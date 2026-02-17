@@ -1,0 +1,6 @@
+\.venv/
+embeddings/
+data/
+__pycache__/
+*.pyc
+*.pkl
