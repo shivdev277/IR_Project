@@ -1,5 +1,6 @@
 sentence-transformers
 pymupdf
-pdfplumber
+python-pptx
 scikit-learn
 numpy
+streamlit
