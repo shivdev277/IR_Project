@@ -4,3 +4,5 @@ python-pptx
 scikit-learn
 numpy
 streamlit
+fastapi
+uvicorn[standard]
