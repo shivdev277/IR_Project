@@ -37,5 +37,8 @@ def search_query(query, embedding_file):
 
     scores = cosine_similarity(query_vec, page_vecs)[0]
 
-    best_index = scores.argmax()
-    return pages[best_index]
+    best_index = int(scores.argmax())
+    best_score = float(scores[best_index])
+
+    # Return the best matching page together with its cosine similarity score
+    return pages[best_index], best_score
