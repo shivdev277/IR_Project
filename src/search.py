@@ -1,13 +1,15 @@
+import pickle
+import os
+
+import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-import pickle
-import numpy as np
-import os
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 
-def search_query(query, embedding_file):
+def _load_pages(embedding_file):
+    """Load and validate page-level embeddings from disk."""
     if not os.path.exists(embedding_file):
         raise FileNotFoundError(
             f"Embeddings file not found: {embedding_file}.\n"
@@ -26,6 +28,19 @@ def search_query(query, embedding_file):
     if not pages:
         raise RuntimeError(f"Embeddings file {embedding_file} contains no pages.")
 
+    return pages
+
+
+def search_top_k(query, embedding_file, k=3):
+    """
+    Return the Top-K ranked pages/slides using cosine similarity.
+
+    Returns a list of dictionaries with:
+    - page: raw page object
+    - score: cosine similarity score as float
+    """
+    pages = _load_pages(embedding_file)
+
     # Ensure vectors exist
     try:
         page_vecs = np.array([p["vector"] for p in pages])
@@ -33,12 +48,29 @@ def search_query(query, embedding_file):
         raise RuntimeError(
             "Embeddings file does not contain page vectors. Recreate embeddings by running `scripts/generate_embeddings.py`.")
 
-    query_vec = model.encode([query])
+    if k <= 0:
+        raise ValueError("k must be greater than 0.")
 
+    query_vec = model.encode([query])
     scores = cosine_similarity(query_vec, page_vecs)[0]
 
-    best_index = int(scores.argmax())
-    best_score = float(scores[best_index])
+    top_indices = np.argsort(scores)[::-1][:k]
 
-    # Return the best matching page together with its cosine similarity score
-    return pages[best_index], best_score
+    ranked_results = []
+    for index in top_indices:
+        ranked_results.append({
+            "page": pages[int(index)],
+            "score": float(scores[int(index)]),
+        })
+
+    return ranked_results
+
+
+def search_query(query, embedding_file):
+    """Backward-compatible helper that returns only the best result."""
+    ranked_results = search_top_k(query=query, embedding_file=embedding_file, k=1)
+    if not ranked_results:
+        raise RuntimeError("No ranked results were found for the given query.")
+
+    top_result = ranked_results[0]
+    return top_result["page"], top_result["score"]

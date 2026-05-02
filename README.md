@@ -1,45 +1,110 @@
-# Semantic Page-Level PDF Retrieval
+# Semantic Page-Level PDF & PPT Retrieval System
 
-This repository implements a semantic, page-level PDF retrieval system: each PDF page is treated as a document, pages are embedded with SentenceTransformers, and queries return the most relevant page and an extracted answer.
+This project is an Information Retrieval (IR) system for semantic search over course documents.
 
-Quick start (Windows PowerShell):
+Core pipeline:
+- Sentence-BERT embeddings (`all-MiniLM-L6-v2`)
+- Cosine similarity ranking
+- Top-3 retrieval results
+- FastAPI backend + React (Vite) frontend
 
-1. Clone:
+## Project Structure
 
-   git clone <your-fork-url>
-   cd "E:\VS code\IR_Project"
+- `api.py`: FastAPI backend API (`/search`)
+- `src/search.py`: embedding loading + cosine similarity ranking
+- `src/answer_extractor.py`: retrieval-only sentence selection from top document
+- `scripts/generate_embeddings.py`: embedding generation from PDF/PPT files
+- `scripts/evaluate_precision_at_1.py`: IR evaluation script
+- `evaluation/test_queries.json`: manual test set for Precision@1
+- `frontend/`: React (Vite) UI
 
-2. Create and activate a virtual environment (Windows PowerShell):
+## Run the Project (Windows PowerShell)
+
+### 1. Backend setup
 
 ```powershell
-python -m venv .venv
-& ".venv\Scripts\Activate.ps1"
+cd "E:\VS code\IR_Project"
+python -m venv venv
+& ".\venv\Scripts\Activate.ps1"
+python -m pip install -r requirements.txt
 ```
 
-3. Install dependencies:
+### 2. Generate embeddings (first time or after document updates)
 
 ```powershell
-& ".venv\Scripts\python.exe" -m pip install -r requirements.txt
+python scripts\generate_embeddings.py
 ```
 
-4. Add your PDFs:
-
- - Place PDF files under `data/pdfs/` (create the folder if missing).
-
-5. Generate embeddings:
+### 3. Start backend API
 
 ```powershell
-& ".venv\Scripts\python.exe" scripts\generate_embeddings.py
+python -m uvicorn api:app --reload
 ```
 
-6. Run the app:
+Backend will run at: `http://127.0.0.1:8000`
+
+### 4. Start frontend (new terminal)
 
 ```powershell
-& ".venv\Scripts\python.exe" main.py
+cd "E:\VS code\IR_Project\frontend"
+npm install
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
+Frontend will run at the URL shown by Vite (typically `http://127.0.0.1:5173`).
+
+## Search API Response Format
+
+`POST /search`
+
+```json
+{
+   "answer": "...",
+   "results": [
+      {
+         "file": "file1.pdf",
+         "page": 3,
+         "score": 0.89
+      },
+      {
+         "file": "file2.pptx",
+         "page": 5,
+         "score": 0.76
+      },
+      {
+         "file": "file3.pdf",
+         "page": 7,
+         "score": 0.65
+      }
+   ]
+}
 ```
 
 Notes:
-- The repository intentionally ignores `data/` and `embeddings/` (see `.gitignore`). Do not commit large PDFs or embedding files.
-- If you want to share sample data with collaborators, consider adding a very small sample PDF or publishing embeddings as a release / external storage location.
+- `results` are sorted by cosine similarity in descending order.
+- This is retrieval-only behavior (no generative model output).
 
-If you want, I can add a tiny sample PDF (under a `sample/` folder) so the repo runs out-of-the-box — tell me if you want that and I'll add it.
+## IR Evaluation (Precision@1)
+
+Manual test set is defined in:
+- `evaluation/test_queries.json`
+
+Run evaluation:
+
+```powershell
+python scripts\evaluate_precision_at_1.py
+```
+
+Output includes:
+- Query-wise Top-1 file prediction
+- Relevance flag (`True` / `False`)
+- Final `Precision@1`
+
+Formula:
+
+`Precision@1 = Correct Top-1 Results / Total Queries`
+
+## Notes
+
+- Keep `data/` and `embeddings/` out of git commits for large files.
+- If your frontend uses a port other than 5173, backend CORS already allows localhost/127.0.0.1 with any port.

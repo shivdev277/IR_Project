@@ -1,0 +1,52 @@
+[
+  {
+    "course": "NETSEC",
+    "query": "Define firewall",
+    "relevant_files": ["0-Concepts of Security.pptx"]
+  },
+  {
+    "course": "NETSEC",
+    "query": "Explain confidentiality, integrity, and availability",
+    "relevant_files": ["0-Concepts of Security.pptx"]
+  },
+  {
+    "course": "NETSEC",
+    "query": "What is symmetric key cryptography?",
+    "relevant_files": ["3-Symmetric Key Cryptographic Algorithms.pptx"]
+  },
+  {
+    "course": "NETSEC",
+    "query": "How does Diffie-Hellman key exchange work?",
+    "relevant_files": ["2-Diffie-Hellman key exchange agreement algorithm.pptx"]
+  },
+  {
+    "course": "NETSEC",
+    "query": "List common cryptography techniques",
+    "relevant_files": ["1-Cryptography Techniques.pptx"]
+  },
+  {
+    "course": "AI",
+    "query": "What is an intelligent agent?",
+    "relevant_files": ["02_Lecture_agents (1).pdf"]
+  },
+  {
+    "course": "AI",
+    "query": "Explain constraint satisfaction problems",
+    "relevant_files": ["03a_Lecture_CSP.pdf"]
+  },
+  {
+    "course": "AI",
+    "query": "What is adversarial search in AI?",
+    "relevant_files": ["03b_Adversarial Search and Games.pdf"]
+  },
+  {
+    "course": "AI",
+    "query": "Define fuzzy logic",
+    "relevant_files": ["06_Artificial_Intelligence [Fuzzy_Logic] (1).pdf"]
+  },
+  {
+    "course": "AI",
+    "query": "What are NLP basics?",
+    "relevant_files": ["09-Lecture - NLP Basics.pdf"]
+  }
+]
