@@ -60,10 +60,9 @@ function App() {
           rank: index + 1,
           file: result.file ?? "Unknown",
           page: result.page ?? "N/A",
-          score:
-            typeof result.score === "number"
-              ? result.score.toFixed(4)
-              : (result.score ?? "N/A"),
+          score: typeof result.score === "number" ? result.score.toFixed(4) : (result.score ?? "N/A"),
+          bm25: typeof result.bm25 === "number" ? result.bm25.toFixed(4) : (result.bm25 ?? "N/A"),
+          cosine: typeof result.cosine === "number" ? result.cosine.toFixed(4) : (result.cosine ?? "N/A"),
           locationLabel: getLocationLabel(result.file),
         }));
 
@@ -135,7 +134,9 @@ function App() {
                             <p className="ranked-title">Rank #{result.rank}</p>
                             <p className="result-line"><strong>File Name:</strong> {result.file}</p>
                             <p className="result-line"><strong>{result.locationLabel}:</strong> {result.page}</p>
-                            <p className="result-line"><strong>Similarity Score:</strong> {result.score}</p>
+                            <p className="result-line"><strong>Final Score:</strong> {result.score}</p>
+                            <p className="result-line"><strong>BM25 Score:</strong> {result.bm25}</p>
+                            <p className="result-line"><strong>Cosine Score:</strong> {result.cosine}</p>
                           </div>
                         ))}
                       </div>
@@ -166,6 +167,8 @@ function App() {
             >
               <option value="AI">AI</option>
               <option value="NETSEC">NETSEC</option>
+              <option value="IR">IR</option>
+              <option value="IR">IR</option>
             </select>
           </div>
 

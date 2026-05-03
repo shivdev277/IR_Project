@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from src.search import search_top_k
+from src.search import search_hybrid_top_k
 from src.answer_extractor import extract_answer
 
 app = FastAPI(
@@ -36,6 +36,8 @@ class RankedResult(BaseModel):
     file: str
     page: int
     score: float
+    bm25: float
+    cosine: float
 
 
 class SearchResponse(BaseModel):
@@ -56,7 +58,7 @@ def root():
 def search(request: SearchRequest) -> SearchResponse:
     """
     Retrieve Top-3 ranked pages/slides for *query* from pre-built embeddings.
-    Ranking is based strictly on cosine similarity (descending).
+    Ranking uses hybrid retrieval: BM25 + SBERT cosine similarity.
     """
     # Build the path to the course's pre-computed embedding file
     embedding_file = os.path.join("embeddings", f"{request.course}.pkl")
@@ -70,9 +72,9 @@ def search(request: SearchRequest) -> SearchResponse:
             ),
         )
 
-    # Run Top-K cosine-similarity search over all page embeddings
+    # Run Top-K hybrid search over all page embeddings
     try:
-        ranked_results = search_top_k(request.query, embedding_file, k=3)
+        ranked_results = search_hybrid_top_k(request.query, embedding_file, k=3)
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except ValueError as e:
@@ -92,6 +94,8 @@ def search(request: SearchRequest) -> SearchResponse:
             file=os.path.basename(str(result["page"].get("pdf", "Unknown"))),
             page=int(result["page"].get("page", 0)),
             score=round(float(result["score"]), 4),
+            bm25=round(float(result["bm25"]), 4),
+            cosine=round(float(result["cosine"]), 4),
         )
         for result in ranked_results
     ]
